@@ -1,21 +1,37 @@
-function printo(obj, skipPrototype, printFunctionsBody, maxDepth) {
+function printo(obj, options) {
     'use strict';
 
-    if (skipPrototype === undefined) skipPrototype = false;
-    if (printFunctionsBody === undefined) printFunctionsBody = false;
+    options = {
+        maxDepth: 50,
+        skipPrototype: false,
+        truncateFunctions: true,
+        formatter,
+        pathFormatter
+    };
 
     const ROOT_KEY = 'root';
-
-    const TYPE_START = ' (';
-    const TYPE_END = ')';
-
-    const PROTO_IDENTIFIER = '__proto__.';
     const MAXDEPTH_IDENTIFIER = '/* MAX DEPTH */';
-    const POINTER_IDENTIFIER = '*';
-
-    const PATH_START = '/* POINTER(';
-    const PATH_END = ') */';
-    const PATH_SEPARATOR = '.';
+    
+    function formatter(obj, prop, type, value, constructorName, path, isPrototype, isPointer, maxDepth) {
+        const PROTO_IDENTIFIER = '__proto__.';
+        const POINTER_IDENTIFIER = ' *POINTER';
+        
+        var key = (isPrototype ? PROTO_IDENTIFIER : '') + prop + ' (' + type + (type === 'object' ? ' ' + constructorName : '') + ')' + (isPointer ? POINTER_IDENTIFIER : '');
+        var val = maxDepth ? value : value;
+        
+        return {
+            key,
+            val
+        };
+    }
+    
+    function pathFormatter(path) {
+        const PREFIX = '/*';
+        const SUFIX = '*/';
+        const PATH_SEPARATOR = '.';
+        
+        return PREFIX + ' '+ path.join(PATH_SEPARATOR)+' ' + SUFIX;
+    }
 
     const mem = {
         nodes: [],
@@ -26,19 +42,7 @@ function printo(obj, skipPrototype, printFunctionsBody, maxDepth) {
 
     wrapper[ROOT_KEY] = obj;
 
-    function formatter(prop, type, value, constructorName, path, isPrototype, isPointer, maxDepth) {
-        var key = (isPrototype ? PROTO_IDENTIFIER : '') + prop + TYPE_START + type + (type === 'object' ? ' ' + constructorName : '') + TYPE_END + (isPointer ? POINTER_IDENTIFIER : '');
-        var val = maxDepth ? value : value;
 
-        return {
-            key,
-            val
-        };
-    }
-
-    function pathFormatter(array) {
-        return PATH_START + array.join(PATH_SEPARATOR) + PATH_END;
-    }
 
     function visit(obj, path) {
         var i = mem.nodes.length;
@@ -54,7 +58,7 @@ function printo(obj, skipPrototype, printFunctionsBody, maxDepth) {
         return mem.path[i];
     }
 
-    function kindOf(variable) {
+    function typeOf(variable) {
         if (variable === null) {
             return 'null';
         }
@@ -99,18 +103,22 @@ function printo(obj, skipPrototype, printFunctionsBody, maxDepth) {
     }
 
     function expandObject(obj, path) {
-        var level = path.length;
-
-        const isMaxdepth = (level >= maxDepth && maxDepth !== undefined);
+        
+        const depth = path.length;
+        const isMaxDepth = (depth >= options.maxDepth && options.maxDepth !== undefined);
 
         const symbols = {};
 
         visit(obj, path);
 
+
+        // expand child properties
         for (let prop in obj) {
 
             const isProto = !Object.prototype.hasOwnProperty.call(obj, prop);
-            if (skipPrototype && isProto) continue;
+            if (options.skipPrototype && isProto) continue;
+            
+            const type = typeOf(obj[prop]);
 
             // access child
             let child;
@@ -118,33 +126,32 @@ function printo(obj, skipPrototype, printFunctionsBody, maxDepth) {
                 child = obj[prop];
             }
             catch (err) {
-                symbols['/* ' + prop + ' (ERROR) */'] = err;
-                continue; //skip
+                symbols['/* ' + prop + ' (EXCEPTION) */'] = err;
+                continue; // skip
             }
 
-            const type = kindOf(obj[prop]);
-            const constructorName = getConstructor(child);
-
-
-
+            let constructorName = getConstructor(child);
 
             let printVal;
+
             const pointer = isVisited(child);
 
             if (pointer) {
-                printVal = pathFormatter(pointer);
+                printVal = options.pathFormatter(pointer);
             }
             else if (type === 'function') {
-                printVal = child.toString();
+                let source = child.toString();
+                printVal = options.truncateFunctions ? source.substr(0, 200) + (source.length>200?'(...)':'') : source;
             }
             else if (type === 'object' || type === 'array') {
+
                 let str = stringifableObj(child);
                 if (str) {
                     visit(child, [].concat(path, prop));
                     printVal = str;
                 }
                 else {
-                    if (isMaxdepth) {
+                    if (isMaxDepth) {
                         printVal = MAXDEPTH_IDENTIFIER;
                     }
                     else {
@@ -152,11 +159,11 @@ function printo(obj, skipPrototype, printFunctionsBody, maxDepth) {
                     }
                 }
             }
-            else { //primitive
+            else { // primitive
                 printVal = child;
             }
 
-            let p = formatter(prop, type, printVal, constructorName, path, isProto, !!pointer, isMaxdepth);
+            let p = options.formatter(child, prop, type, printVal, constructorName, path, isProto, !!pointer, isMaxDepth);
             symbols[p.key] = p.val;
 
         }
@@ -166,7 +173,5 @@ function printo(obj, skipPrototype, printFunctionsBody, maxDepth) {
     const result = expandObject(wrapper, []);
     return result;
 }
-
-export default printo;
 
 export default printo;

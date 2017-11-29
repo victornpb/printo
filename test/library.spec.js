@@ -1,25 +1,27 @@
 /* global describe, it, before */
 
-import chai from 'chai';
+// import chai from 'chai';
+
 import printo from '../lib/library.js';
 import obj from './obj.js';
-chai.expect();
 
-const expect = chai.expect;
+// chai.expect();
 
-describe('Testing function', () => {
+// const expect = chai.expect;
 
-  describe('importing module', () => {
-    it('default import', () => {
-      expect(typeof printo).to.be.equal('function');
-    });
-  });
+// describe('Testing function', () => {
 
-});
+//   describe('importing module', () => {
+//     it('default import', () => {
+//       expect(typeof printo).to.be.equal('function');
+//     });
+//   });
+
+// });
 
 
-// console.log(JSON.stringify(printo(obj, false, true, 9), null, 2));
+console.log(JSON.stringify(printo(obj, false, true, 9), null, 2));
 
-// console.log(JSON.stringify(printo("Text"), null, 2));
+console.log(JSON.stringify(printo("Text"), null, 2));
 
-// console.log(JSON.stringify(printo(null), null, 2));
+console.log(JSON.stringify(printo(null), null, 2));
