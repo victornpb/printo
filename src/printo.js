@@ -1,70 +1,96 @@
 function printo(obj, skipPrototype, printFunctionsBody, maxDepth) {
-    "use strict";
+    'use strict';
 
     if (skipPrototype === undefined) skipPrototype = false;
     if (printFunctionsBody === undefined) printFunctionsBody = false;
 
-    const ROOT_KEY = "root";
+    const ROOT_KEY = 'root';
 
-    const TYPE_START = " (";
-    const TYPE_END = ")";
+    const TYPE_START = ' (';
+    const TYPE_END = ')';
 
-    const PROTO_IDENTIFIER = "__proto__.";
-    const MAXDEPTH_IDENTIFIER = "/* MAX DEPTH */";
-    const POINTER_IDENTIFIER = "*";
+    const PROTO_IDENTIFIER = '__proto__.';
+    const MAXDEPTH_IDENTIFIER = '/* MAX DEPTH */';
+    const POINTER_IDENTIFIER = '*';
 
-    const PATH_START = "/* POINTER(";
-    const PATH_END = ") */";
-    const PATH_SEPARATOR = ".";
+    const PATH_START = '/* POINTER(';
+    const PATH_END = ') */';
+    const PATH_SEPARATOR = '.';
 
-    var mem = {
+    const mem = {
         nodes: [],
-        memo: []
+        path: []
     };
 
-    var wrapper = {};
+    const wrapper = {};
+
     wrapper[ROOT_KEY] = obj;
 
-    var result = expandObject(wrapper, ROOT_KEY, '', 0); //inicia a varredura
-    return result;
+    function formatter(prop, type, value, constructorName, path, isPrototype, isPointer, maxDepth) {
+        var key = (isPrototype ? PROTO_IDENTIFIER : '') + prop + TYPE_START + type + (type === 'object' ? ' ' + constructorName : '') + TYPE_END + (isPointer ? POINTER_IDENTIFIER : '');
+        var val = maxDepth ? value : value;
 
-    function visit(obj, key, path) {
+        return {
+            key,
+            val
+        };
+    }
+
+    function pathFormatter(array) {
+        return PATH_START + array.join(PATH_SEPARATOR) + PATH_END;
+    }
+
+    function visit(obj, path) {
         var i = mem.nodes.length;
+
         mem.nodes[i] = obj;
-        mem.memo[i] = { key: key, path: path };
+        mem.path[i] = path;
     }
 
     function isVisited(obj) {
         var i = mem.nodes.indexOf(obj);
+
         if (i < 0) return false;
-        else return mem.memo[i];
+        return mem.path[i];
     }
 
     function kindOf(variable) {
-        var type;
         if (variable === null) {
-            type = 'null';
+            return 'null';
         }
         else if (Object.prototype.toString.call(variable) === '[object Array]') {
-            type = 'array';
+            return 'array';
         }
         else {
-            type = typeof variable;
+            return typeof variable;
         }
-        return type;
     }
 
-    function isHTMLElement(o) {
-        return getConstructor(o).match(/HTML/);
+    function getConstructor(obj) {
+        if (typeof obj === 'object') {
+            try {
+                return '' + obj.constructor.name;
+            }
+            catch (e) {
+                return 'UNKNOWN';
+            }
+        }
+        return 'PRIMITIVE';
     }
 
-    function printableObj(obj) {
-        if (typeof obj === "object") {
-            var x = Object.prototype.toString.call(obj);
+
+    function stringifableObj(obj) {
+
+        function isHTMLElement(o) {
+            return getConstructor(o).match(/HTML/);
+        }
+
+        if (typeof obj === 'object') {
+            const x = Object.prototype.toString.call(obj);
             switch (x) {
-                case "[object Date]":
+                case '[object Date]':
                     return obj.toString();
-                case "[object RegExp]":
+                case '[object RegExp]':
                     return obj.toString();
             }
             if (isHTMLElement(obj)) return obj.outerHTML;
@@ -72,83 +98,75 @@ function printo(obj, skipPrototype, printFunctionsBody, maxDepth) {
         return false;
     }
 
-    function getConstructor(obj) {
-        if (typeof obj === 'object') {
+    function expandObject(obj, path) {
+        var level = path.length;
+
+        const isMaxdepth = (level >= maxDepth && maxDepth !== undefined);
+
+        const symbols = {};
+
+        visit(obj, path);
+
+        for (let prop in obj) {
+
+            const isProto = !Object.prototype.hasOwnProperty.call(obj, prop);
+            if (skipPrototype && isProto) continue;
+
+            // access child
+            let child;
             try {
-                return obj.constructor.name;
-            } catch (e) {
-                return "Unknown Constructor";
+                child = obj[prop];
             }
-        }
-        return "NOT_OBJECT";
-    }
-
-    function expandObject(obj, parentKey, path, level) {
-        if (level === undefined) level = 0;
-
-        var str = {};
-
-        visit(obj, parentKey, path);
-
-        for (var key in obj) {
-            var child;
-
-            var fromProto = !Object.prototype.hasOwnProperty.call(obj, key);
-            if (skipPrototype && fromProto) continue;
-            var protoFlag = (fromProto ? PROTO_IDENTIFIER : "");
-
-            try {
-                child = obj[key];
-            } catch (err) {
-                str["/* EXCEPTION " + Math.random() + " */"] = err;
-                continue;
+            catch (err) {
+                symbols['/* ' + prop + ' (ERROR) */'] = err;
+                continue; //skip
             }
 
-            var kind = kindOf(obj[key]);
+            const type = kindOf(obj[prop]);
+            const constructorName = getConstructor(child);
 
-            if (typeof child === "object" && child !== null) { //key is an Object (have children)
-                var constructorName = getConstructor(child);
 
-                var p;
-                if (p = isVisited(child)) {
-                    str["" + protoFlag + key + TYPE_START + kind + " " + constructorName + TYPE_END + POINTER_IDENTIFIER] = PATH_START + p.path.substr(PATH_SEPARATOR.length) + PATH_END;
+
+
+            let printVal;
+            const pointer = isVisited(child);
+
+            if (pointer) {
+                printVal = pathFormatter(pointer);
+            }
+            else if (type === 'function') {
+                printVal = child.toString();
+            }
+            else if (type === 'object' || type === 'array') {
+                let str = stringifableObj(child);
+                if (str) {
+                    visit(child, [].concat(path, prop));
+                    printVal = str;
                 }
                 else {
-                    if (level < maxDepth || maxDepth === undefined) {
-                        var toStr;
-                        if (toStr = printableObj(child)) {
-                            visit(child, key, path + PATH_SEPARATOR + key);
-                            str["" + protoFlag + key + TYPE_START + kind + " " + constructorName + TYPE_END] = toStr;
-                        }
-                        else {
-                            str["" + protoFlag + key + TYPE_START + kind + " " + constructorName + TYPE_END] = expandObject(child, key, path + PATH_SEPARATOR + key, level + 1); //print children using recursion
-                        }
+                    if (isMaxdepth) {
+                        printVal = MAXDEPTH_IDENTIFIER;
                     }
                     else {
-                        str["" + protoFlag + key + TYPE_START + kind + " " + constructorName + TYPE_END] = MAXDEPTH_IDENTIFIER;
-
+                        printVal = expandObject(child, [].concat(path, prop)); // print children using recursion
                     }
                 }
             }
-            else { //obj is a property (does not have children)
-
-                //str.push(tab(level));
-                if (kind === "function") {
-                    if (!printFunctionsBody) {
-                        str["" + protoFlag + key + TYPE_START + kind + TYPE_END] = child.toString().match(/.*/)[0].substr(0, 200) + "...";
-                    }
-                    else {
-                        str["" + protoFlag + key + TYPE_START + kind + TYPE_END] = child.toString();
-                    }
-                }
-                else {
-                    str["" + protoFlag + key + TYPE_START + kind + TYPE_END] = child;
-                }
+            else { //primitive
+                printVal = child;
             }
+
+            let p = formatter(prop, type, printVal, constructorName, path, isProto, !!pointer, isMaxdepth);
+            symbols[p.key] = p.val;
 
         }
-        return str;
+        return symbols;
     }
+
+    const result = expandObject(wrapper, []);
+    return result;
 }
+
+export default printo;
 
 export default printo;
