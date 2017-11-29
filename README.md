@@ -1,153 +1,85 @@
-# printo.js
-Function to visualize objects of any kind including recursive structures in a printable string
+# Webpack library starter
 
+Webpack based boilerplate for producing libraries (Input: ES6, Output: universal library)
 
-DEMO JSFiddle: https://jsfiddle.net/Victornpb/nq13wke4/
+![Travis](https://travis-ci.org/krasimir/webpack-library-starter.svg?branch=master)
 
-Usage
-------
+## Features
 
-    printo(/* anything */);
+* Webpack 3 based.
+* ES6 as a source.
+* Exports in a [umd](https://github.com/umdjs/umd) format so your library works everywhere.
+* ES6 test setup with [Mocha](http://mochajs.org/) and [Chai](http://chaijs.com/).
+* Linting with [ESLint](http://eslint.org/).
 
-Example
--------
-
-### Javascript
-```
-function Point(x, y) {
-    this.x = x;
-    this.y = y;
-}
-Point.prototype.a = -1;
-Point.prototype.b = -2;
-
-obj = {
-    x: 1,
-    str: "hello",
-    arr: [1, 2, 3],
-    arr2: [1, '1', true, false, null, NaN, Infinity, {},
-        []
-    ],
-    boo: {
-        foo: {
-            bar: "hey",
-            baz: {
-                hello: {
-                    world: "Hey!"
-                }
-            }
-        },
-        zzP: {},
-        zzz: {
-            x: 1,
-            y: 2
-        },
-        www: {
-            s: 1,
-            d: 2
-        },
-        wwP: {},
-        fn: Point,
-        alert: alert,
-        d1: new Date(),
-        p1: new Point(0, 1),
-        rgx: /abc/,
-        div: document.createElement('div')
-
-    }
-
-}
-
-//create a few recursions
-obj.boo.zzP = obj.boo.zzz;
-obj.boo.wwP = obj.boo.www;
-obj.boo.wwP = obj.boo.www;
-obj.boo.d2 = obj.boo.d1;
-obj.boo.rgx2 = obj.boo.rgx;
-obj.boo.rec = obj.boo;
-
-//print object
-out.innerHTML = printo(obj);
+## Process
 
 ```
-
-
-### Output
+ES6 source files
+       |
+       |
+    webpack
+       |
+       +--- babel, eslint
+       |
+  ready to use
+     library
+  in umd format
 ```
-root (object Object) => {
-    x (number) => 1
-    str (string) => hello
-    arr (array Array) => {
-        0 (number) => 1
-        1 (number) => 2
-        2 (number) => 3
+
+*Have in mind that you have to build your library before publishing. The files under the `lib` folder are the ones that should be distributed.*
+
+## Getting started
+
+1. Setting up the name of your library
+  * Open `webpack.config.js` file and change the value of `libraryName` variable.
+  * Open `package.json` file and change the value of `main` property so it matches the name of your library.
+2. Build your library
+  * Run `yarn install` (recommended) or `npm install` to get the project's dependencies
+  * Run `yarn build` or `npm run build` to produce minified version of your library.
+3. Development mode
+  * Having all the dependencies installed run `yarn dev` or `npm run dev`. This command will generate an non-minified version of your library and will run a watcher so you get the compilation on file change.
+4. Running the tests
+  * Run `yarn test` or `npm run test`
+
+## Scripts
+
+* `yarn build` or `npm run build` - produces production version of your library under the `lib` folder
+* `yarn dev` or `npm run dev` - produces development version of your library and runs a watcher
+* `yarn test` or `npm run test` - well ... it runs the tests :)
+* `yarn test:watch` or `npm run test:watch` - same as above but in a watch mode
+
+## Readings
+
+* [Start your own JavaScript library using webpack and ES6](http://krasimirtsonev.com/blog/article/javascript-library-starter-using-webpack-es6)
+
+## Misc
+
+### An example of using dependencies that shouldn’t be resolved by webpack, but should become dependencies of the resulting bundle
+
+In the following example we are excluding React and Lodash:
+
+```js
+{
+  devtool: 'source-map',
+  output: {
+    path: '...',
+    libraryTarget: 'umd',
+    library: '...'
+  },
+  entry: '...',
+  ...
+  externals: {
+    react: 'react'
+    // Use more complicated mapping for lodash.
+    // We need to access it differently depending
+    // on the environment.
+    lodash: {
+      commonjs: 'lodash',
+      commonjs2: 'lodash',
+      amd: '_',
+      root: '_'
     }
-
-    arr2 (array Array) => {
-        0 (number) => 1
-        1 (string) => 1
-        2 (boolean) => true
-        3 (boolean) => false
-        4 (null) => null
-        5 (number) => NaN
-        6 (number) => Infinity
-        7 (object Object) => {
-        }
-
-        8 (array Array) => {
-        }
-
-    }
-
-    boo (object Object) => {
-        foo (object Object) => {
-            bar (string) => hey
-            baz (object Object) => {
-                hello (object Object) => {
-                    world (string) => Hey!
-                }
-
-            }
-
-        }
-
-        zzP (object Object) => {
-            x (number) => 1
-            y (number) => 2
-        }
-
-        zzz (object Object) => POINTER(root.boo.zzP)
-        www (object Object) => {
-            s (number) => 1
-            d (number) => 2
-        }
-
-        wwP (object Object) => POINTER(root.boo.www)
-        fn (function) => function Point(x, y) {...
-        alert (function) => function alert() { [native code] }...
-        d1 (object Date) => Wed May 10 2017 14:27:29 GMT-0300 (BRT)
-        p1 (object Point) => {
-            x (number) => 0
-            y (number) => 1
-            (proto) a (number) => -1
-            (proto) b (number) => -2
-        }
-
-        rgx (object RegExp) => /abc/
-        div (object HTMLDivElement) => DIV
-        d2 (object Date) => POINTER(root.boo.d1)
-        rgx2 (object RegExp) => POINTER(root.boo.rgx)
-        rec (object Object) => POINTER(root.boo)
-    }
-
+  }
 }
 ```
-
-
-A little background about this function
-----------
-
-I wrote this function back in the dark IE6 days, when Develpment tools (firebug, dragonfly, devtools) wasn't a thing, so the only thing you did back then was scatter alert()'s all over your code that was behaving. Trying to make something very object-oriented was a pain, so I wrote this function that I used to debug and inspect variables at runtime. I could use the `javascript:` protocol to launch popup with `window.open()` with the result of the `printo(someVeryComplicatedObject)`. 
-Today much of the use cases has been replaced by browser tools like the awesome Chrome DevTools, but it still usefull in some situations and eviroments where dubug tools are not available.
-
-Enjoy.
