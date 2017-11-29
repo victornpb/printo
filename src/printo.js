@@ -1,17 +1,4 @@
-/**
- * Visualize an Object in a printable string
- * @param  {Object}   obj                        An object to be visualized
- * @param  {String}   [linebreak="\n"]           Line break character (default:\n)
- * @param  {String}   [tabulation="\t"]          Tabulation character (default:\t)
- * @param  {String}   [skipPrototype=false]      Skip prototype properties
- * @param  {String}   [printFunctionsBody=false] Print functions body or just the signature
- * @param  {String}   [maxDeep=-1]               Max deepness to traverse the tree
- * @return {String}   The output string
- *
- * @author Victor N. wwww.victorborges.com
- * @date   2006
- * @see https://github.com/victornpb/printo.js
- */
+
 function printo(obj, linebreak, tabulation, skipPrototype, printFunctionsBody, maxDeep) {
     "use strict";
 
@@ -24,12 +11,12 @@ function printo(obj, linebreak, tabulation, skipPrototype, printFunctionsBody, m
     const TYPE_START = " (";
     const TYPE_END = ")";
     const VALUE_ARRROW = " => ";
-    const PATH_START = "(";
-    const PATH_END = ")";
+    const PATH_START = "/* ";
+    const PATH_END = " */";
     const PATH_SEPARATOR = ".";
-    const PROTO_IDENTIFIER = "(proto) ";
-    const POINTER_IDENTIFIER = "POINTER";
-    const MAXDEEP_IDENTIFIER = "MAXDEEP";
+    const PROTO_IDENTIFIER = "__proto__.";
+    const POINTER_IDENTIFIER = " POINTER";
+    const MAXDEEP_IDENTIFIER = "/* MAXDEEP */";
 
 
     var n = linebreak ? linebreak : "\n";
@@ -62,6 +49,7 @@ function printo(obj, linebreak, tabulation, skipPrototype, printFunctionsBody, m
         mem.memo[i] = { key: key, path: path };
 
     }
+
     function isVisited(obj) {
         // for (var i = 0; i < nodes.length; i++) {
         // 	if (nodes[i].pointer === obj) {
@@ -74,6 +62,7 @@ function printo(obj, linebreak, tabulation, skipPrototype, printFunctionsBody, m
         if (i < 0) return false;
         else return mem.memo[i];
     }
+
     function kindOf(variable) {
         var type;
         if (variable === null) {
@@ -120,7 +109,7 @@ function printo(obj, linebreak, tabulation, skipPrototype, printFunctionsBody, m
     function expandObject(obj, parentKey, path, level) {
         if (level === undefined) level = 0;
 
-        var str = [];
+        var str = {};
 
         visit(obj, parentKey, path);
 
@@ -134,7 +123,7 @@ function printo(obj, linebreak, tabulation, skipPrototype, printFunctionsBody, m
             try {
                 child = obj[key];
             } catch (err) {
-                str.push("(!!!)" + err + "(/!!!)");
+                str["/* EXCEPTION " + Math.random() + " */"] = err;
                 continue;
             }
 
@@ -145,46 +134,43 @@ function printo(obj, linebreak, tabulation, skipPrototype, printFunctionsBody, m
 
                 var p;
                 if (p = isVisited(child)) {
-                    str.push(tab(level) + "" + protoFlag + key + TYPE_START + kind + " " + constructorName + TYPE_END + VALUE_ARRROW + POINTER_IDENTIFIER + PATH_START + p.path.substr(PATH_SEPARATOR.length) + PATH_END + n);
+                    str["" + protoFlag + key + TYPE_START + kind + " " + constructorName + TYPE_END + POINTER_IDENTIFIER] = PATH_START + p.path.substr(PATH_SEPARATOR.length) + PATH_END;
                 }
                 else {
                     if (level < maxDeep || maxDeep === undefined) {
                         var toStr;
                         if (toStr = printableObj(child)) {
                             visit(child, key, path + PATH_SEPARATOR + key);
-                            str.push(tab(level) + "" + protoFlag + key + TYPE_START + kind + " " + constructorName + TYPE_END + VALUE_ARRROW + toStr + n);
+                            str["" + protoFlag + key + TYPE_START + kind + " " + constructorName + TYPE_END] = toStr;
                         }
                         else {
-                            str.push(tab(level) + "" + protoFlag + key + TYPE_START + kind + " " + constructorName + TYPE_END + VALUE_ARRROW + FAMILY_START + n);
-                            str.push(expandObject(child, key, path + PATH_SEPARATOR + key, level + 1)); //print children using recursion
-                            str.push(tab(level) + FAMILY_END + n);
-                            str.push(tab(level) + n);
+                            str["" + protoFlag + key + TYPE_START + kind + " " + constructorName + TYPE_END] = expandObject(child, key, path + PATH_SEPARATOR + key, level + 1); //print children using recursion
                         }
                     }
                     else {
-                        str.push(tab(level) + "" + protoFlag + key + TYPE_START + kind + " " + constructorName + TYPE_END + VALUE_ARRROW + MAXDEEP_IDENTIFIER + n);
+                        str["" + protoFlag + key + TYPE_START + kind + " " + constructorName + TYPE_END] = MAXDEEP_IDENTIFIER;
 
                     }
                 }
             }
             else { //obj is a property (does not have children)
 
-                str.push(tab(level));
+                //str.push(tab(level));
                 if (kind === "function") {
                     if (!printFunctionsBody) {
-                        str.push("" + protoFlag + key + TYPE_START + kind + TYPE_END + VALUE_ARRROW + child.toString().match(/.*/)[0].substr(0, 200) + "..." + n);
+                        str["" + protoFlag + key + TYPE_START + kind + TYPE_END] = child.toString().match(/.*/)[0].substr(0, 200) + "...";
                     }
                     else {
-                        str.push("" + protoFlag + key + TYPE_START + kind + TYPE_END + VALUE_ARRROW + child.toString().replace(/\n/g, '\n' + tab(level)) + n);
+                        str["" + protoFlag + key + TYPE_START + kind + TYPE_END] = child.toString();
                     }
                 }
                 else {
-                    str.push("" + protoFlag + key + TYPE_START + kind + TYPE_END + VALUE_ARRROW + child + n);
+                    str["" + protoFlag + key + TYPE_START + kind + TYPE_END] = child;
                 }
             }
 
         }
-        return str.join('');
+        return str;
     }
 }
 
