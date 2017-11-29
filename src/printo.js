@@ -33,29 +33,23 @@ function printo(obj, options) {
         return PREFIX + ' '+ path.join(PATH_SEPARATOR)+' ' + SUFIX;
     }
 
-    const mem = {
-        nodes: [],
-        path: []
-    };
-
+    function functionFormatter(fn) { 
+        const source = fn.toString();
+        printVal = options.truncateFunctions ? source.substr(0, 200) + (source.length > 200 ? '(...)' : '') : source;
+    }
+    
     const wrapper = {};
-
     wrapper[ROOT_KEY] = obj;
-
-
+    
+    
+    const mem = new WeakMap();
 
     function visit(obj, path) {
-        var i = mem.nodes.length;
-
-        mem.nodes[i] = obj;
-        mem.path[i] = path;
+        mem.set(obj, path);
     }
 
     function isVisited(obj) {
-        var i = mem.nodes.indexOf(obj);
-
-        if (i < 0) return false;
-        return mem.path[i];
+        return mem.get(obj);
     }
 
     function typeOf(variable) {
@@ -111,14 +105,8 @@ function printo(obj, options) {
 
         visit(obj, path);
 
-
         // expand child properties
         for (let prop in obj) {
-
-            const isProto = !Object.prototype.hasOwnProperty.call(obj, prop);
-            if (options.skipPrototype && isProto) continue;
-            
-            const type = typeOf(obj[prop]);
 
             // access child
             let child;
@@ -130,18 +118,20 @@ function printo(obj, options) {
                 continue; // skip
             }
 
-            let constructorName = getConstructor(child);
-
-            let printVal;
-
+            const isProto = !Object.prototype.hasOwnProperty.call(obj, prop);
+            if (options.skipPrototype && isProto) continue;
+            
+            const type = typeOf(obj[prop]);
+            const constructorName = getConstructor(child);
             const pointer = isVisited(child);
 
+            let printVal;
+            
             if (pointer) {
                 printVal = options.pathFormatter(pointer);
             }
             else if (type === 'function') {
-                let source = child.toString();
-                printVal = options.truncateFunctions ? source.substr(0, 200) + (source.length>200?'(...)':'') : source;
+                printVal = functionFormatter(child);
             }
             else if (type === 'object' || type === 'array') {
 
