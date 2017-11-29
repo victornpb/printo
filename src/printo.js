@@ -1,26 +1,21 @@
-
-function printo(obj, linebreak, tabulation, skipPrototype, printFunctionsBody, maxDeep) {
+function printo(obj, skipPrototype, printFunctionsBody, maxDepth) {
     "use strict";
 
     if (skipPrototype === undefined) skipPrototype = false;
     if (printFunctionsBody === undefined) printFunctionsBody = false;
 
     const ROOT_KEY = "root";
-    const FAMILY_START = "{";
-    const FAMILY_END = "}";
+
     const TYPE_START = " (";
     const TYPE_END = ")";
-    const VALUE_ARRROW = " => ";
-    const PATH_START = "/* ";
-    const PATH_END = " */";
-    const PATH_SEPARATOR = ".";
+
     const PROTO_IDENTIFIER = "__proto__.";
-    const POINTER_IDENTIFIER = " POINTER";
-    const MAXDEEP_IDENTIFIER = "/* MAXDEEP */";
+    const MAXDEPTH_IDENTIFIER = "/* MAX DEPTH */";
+    const POINTER_IDENTIFIER = "*";
 
-
-    var n = linebreak ? linebreak : "\n";
-    var tabtoken = tabulation ? tabulation : "\t";
+    const PATH_START = "/* POINTER(";
+    const PATH_END = ") */";
+    const PATH_SEPARATOR = ".";
 
     var mem = {
         nodes: [],
@@ -30,34 +25,16 @@ function printo(obj, linebreak, tabulation, skipPrototype, printFunctionsBody, m
     var wrapper = {};
     wrapper[ROOT_KEY] = obj;
 
-    return expandObject(wrapper, ROOT_KEY, '', 0); //inicia a varredura
-
-    function tab(n) {
-        // return new Array(n+1).join(tabtoken);
-        var str = [];
-        while (n > 0) {
-            str.push(tabtoken);
-            n--;
-        }
-        return (str.join(''));
-    }
-
+    var result = expandObject(wrapper, ROOT_KEY, '', 0); //inicia a varredura
+    return result;
 
     function visit(obj, key, path) {
         var i = mem.nodes.length;
         mem.nodes[i] = obj;
         mem.memo[i] = { key: key, path: path };
-
     }
 
     function isVisited(obj) {
-        // for (var i = 0; i < nodes.length; i++) {
-        // 	if (nodes[i].pointer === obj) {
-        // 		return nodes[i];
-        // 	}
-        // }
-        // return false;
-
         var i = mem.nodes.indexOf(obj);
         if (i < 0) return false;
         else return mem.memo[i];
@@ -90,7 +67,7 @@ function printo(obj, linebreak, tabulation, skipPrototype, printFunctionsBody, m
                 case "[object RegExp]":
                     return obj.toString();
             }
-            if (isHTMLElement(obj)) return obj.tagName;
+            if (isHTMLElement(obj)) return obj.outerHTML;
         }
         return false;
     }
@@ -137,7 +114,7 @@ function printo(obj, linebreak, tabulation, skipPrototype, printFunctionsBody, m
                     str["" + protoFlag + key + TYPE_START + kind + " " + constructorName + TYPE_END + POINTER_IDENTIFIER] = PATH_START + p.path.substr(PATH_SEPARATOR.length) + PATH_END;
                 }
                 else {
-                    if (level < maxDeep || maxDeep === undefined) {
+                    if (level < maxDepth || maxDepth === undefined) {
                         var toStr;
                         if (toStr = printableObj(child)) {
                             visit(child, key, path + PATH_SEPARATOR + key);
@@ -148,7 +125,7 @@ function printo(obj, linebreak, tabulation, skipPrototype, printFunctionsBody, m
                         }
                     }
                     else {
-                        str["" + protoFlag + key + TYPE_START + kind + " " + constructorName + TYPE_END] = MAXDEEP_IDENTIFIER;
+                        str["" + protoFlag + key + TYPE_START + kind + " " + constructorName + TYPE_END] = MAXDEPTH_IDENTIFIER;
 
                     }
                 }
