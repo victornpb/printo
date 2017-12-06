@@ -33,9 +33,14 @@ function printo(obj, options) {
         return PREFIX + ' '+ path.join(PATH_SEPARATOR)+' ' + SUFIX;
     }
 
-    function functionFormatter(fn) { 
-        const source = fn.toString();
-        printVal = options.truncateFunctions ? source.substr(0, 200) + (source.length > 200 ? '(...)' : '') : source;
+    function functionFormatter(fn) {
+        let source = fn.toString();
+        if (options.truncateFunctions) {
+            if (source.length > 50) {
+                source = source.substr(0, source.indexOf(')'));
+            }
+        }
+        return source;
     }
     
     const wrapper = {};
