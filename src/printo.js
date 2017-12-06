@@ -85,7 +85,7 @@ function printo(obj, options) {
     function stringifableObj(obj) {
 
         function isHTMLElement(o) {
-            return getConstructor(o).match(/HTML/);
+            return getConstructor(o).match(/HTML|SVG/);
         }
 
         if (typeof obj === 'object') {
@@ -95,14 +95,16 @@ function printo(obj, options) {
                     return obj.toString();
                 case '[object RegExp]':
                     return obj.toString();
+                case '[object SVGTextElement]':
+                    return obj.toString();
             }
-            if (isHTMLElement(obj)) return obj.outerHTML;
+            if (isHTMLElement(obj)) return (obj.outerHTML || '').match(/<[^>]+>/) + '';
         }
         return false;
     }
 
     function expandObject(obj, path) {
-        
+
         const depth = path.length;
         const isMaxDepth = (depth >= options.maxDepth && options.maxDepth !== undefined);
 
