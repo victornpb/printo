@@ -1,51 +1,62 @@
+/**
+ * 
+ * @param {*} obj Any Javascript variable
+ * @param {Object} options Options used
+ * @param {Number} options.maxDepth Max depth the function should traverse
+ * @param {Boolean} options.skipPrototype Set to true to not enumerate properties from prototype
+ * @param {String} options.rootKey Name use to represent the top level variable
+ * @param {Function} options.formatter Function used to format each key, value in the final JSON
+ * @param {Function} options.pathFormatter Function used to format the pointers path
+ * @param {Function} options.functionFormatter Function used to turn functions into strings
+ */
 function printo(obj, options) {
     'use strict';
 
-    options = {
-        maxDepth: 50,
+    //defaults
+    options = deepObjectExtend({
+        maxDepth: 1024,
         skipPrototype: false,
-        truncateFunctions: true,
-        formatter,
-        pathFormatter
-    };
-
-    const ROOT_KEY = 'root';
-    const MAXDEPTH_IDENTIFIER = '/* MAX DEPTH */';
-
-    function formatter(obj, prop, type, value, constructorName, path, isPrototype, isPointer, maxDepth) {
-        const PROTO_IDENTIFIER = '__proto__.';
-        const POINTER_IDENTIFIER = ' *POINTER';
-
-        var key = (isPrototype ? PROTO_IDENTIFIER : '') + prop + ' (' + type + (type === 'object' ? ' ' + constructorName : '') + ')' + (isPointer ? POINTER_IDENTIFIER : '');
-        var val = maxDepth ? value : value;
-
-        return {
-            key,
-            val
-        };
-    }
-
-    function pathFormatter(path) {
-        const PREFIX = '/*';
-        const SUFIX = '*/';
-        const PATH_SEPARATOR = '.';
-
-        return PREFIX + ' ' + path.join(PATH_SEPARATOR) + ' ' + SUFIX;
-    }
-
-    function functionFormatter(fn) {
-        let source = fn.toString();
-        if (options.truncateFunctions) {
+        rootKey: 'root',
+        formatter: function formatter(obj, prop, type, value, constructorName, path, isPrototype, isPointer, maxDepth) {
+            const PROTO_IDENTIFIER = '__proto__.';
+            const POINTER_IDENTIFIER = ' *POINTER';
+            return {
+                key: `${(isPrototype ? PROTO_IDENTIFIER : '')}${prop} (${type}${(type === 'object' ? ' ' + constructorName : '')})${(isPointer ? POINTER_IDENTIFIER : '')}`,
+                val: maxDepth ? '/* MAX DEPTH */' : value,
+            };
+        },
+        pathFormatter: function pathFormatter(path) {
+            return `/* ${path.join('.')} */`;
+        },
+        functionFormatter: function functionFormatter(fn) {
+            var source = fn.toString();
             if (source.length > 50) {
-                source = source.substr(0, source.indexOf(')'));
+                source = source.substr(0, source.indexOf(')') + 1);
+            }
+            return source;
+        }
+    }, options);
+
+
+    function deepObjectExtend(base, extension) {
+        for (var prop in extension) {
+            if (extension.hasOwnProperty(prop)) {
+                if (base[prop] && typeof extension[prop] === 'object') {
+                    deepObjectExtend(base[prop], extension[prop]);
+                }
+                else {
+                    base[prop] = extension[prop];
+                }
             }
         }
-        return source;
+        return base;
     }
+
+    const ROOT_KEY = options.rootKey;
+    const MAXDEPTH_IDENTIFIER = '/* MAX DEPTH */';
 
     const wrapper = {};
     wrapper[ROOT_KEY] = obj;
-
 
     const mem = new WeakMap();
 
@@ -77,7 +88,6 @@ function printo(obj, options) {
         }
         return 'PRIMITIVE';
     }
-
 
     function stringifableObj(obj) {
 
@@ -133,7 +143,7 @@ function printo(obj, options) {
             if (pointer) {
                 printVal = options.pathFormatter(pointer);
             } else if (type === 'function') {
-                printVal = functionFormatter(child);
+                printVal = options.functionFormatter(child);
             } else if (type === 'object' || type === 'array') {
 
                 let str = stringifableObj(child);
@@ -161,3 +171,5 @@ function printo(obj, options) {
     const result = expandObject(wrapper, []);
     return result;
 }
+
+export default printo;
