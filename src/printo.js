@@ -1,18 +1,13 @@
 /**
- * 
- * @param {*} obj Any Javascript variable
- * @param {Object} [options] Options used
- * @param {Number} [options.maxDepth] Max depth the function should traverse
- * @param {Boolean} [options.skipPrototype=false] Set to true to not enumerate properties from prototype
- * @param {String} [options.rootKey='root'] Name use to represent the top level variable
+ * Turn any javascript object into a serializable object
+ * @param {any} obj Any Javascript variable
+ * @param {object} [options] Options used
+ * @param {(number|null)} [options.maxDepth=null] Max depth the function should traverse
+ * @param {boolean} [options.skipPrototype=false] Set to true to not enumerate properties from prototype
+ * @param {string} [options.rootKey=root] Name use to represent the top level variable
  * @param {formatter} [options.formatter] Function used to format each key, value in the final JSON
  * @param {pointerFormatter} [options.pointerFormatter] Function used to format the pointers path
  * @param {functionFormatter} [options.functionFormatter] Function used to turn functions into strings
-/**
- * 
- * 
- * @param {any} obj 
- * @param {any} options 
  * @returns {object} A serializable object
  */
 function printo(obj, options) {
@@ -20,7 +15,7 @@ function printo(obj, options) {
 
   //defaults
   options = deepObjectExtend({
-    maxDepth: 1024,
+    maxDepth: null,
     skipPrototype: false,
     rootKey: 'root',
     formatter: function formatter(obj, prop, type, value, constructorName, path, isPrototype, isPointer, maxDepth) {
@@ -31,22 +26,9 @@ function printo(obj, options) {
         val: maxDepth ? '/* MAX DEPTH */' : value,
       };
     },
-    /**
-     * Function that formats the value of already visited objects
-     * @callback pointerFormatter
-     * @param {any} obj The actual object reference
-     * @param {Array} path Array containing the path of parent properties
-     * @returns {string} Return a string
-     */
     pointerFormatter: function pointerFormatter(obj, path) {
       return `/* ${path.join('.')} */`;
     },
-    /**
-     * Function that turn functions into strings
-     * @callback functionFormatter
-     * @param {function} fn A function
-     * @returns {string} A printable string
-     */
     functionFormatter: function functionFormatter(fn) {
       var source = fn.toString();
       if (source.length > 50) {
@@ -131,7 +113,7 @@ function printo(obj, options) {
   function expandObject(obj, path) {
 
     const depth = path.length;
-    const isMaxDepth = (depth >= options.maxDepth && options.maxDepth !== undefined);
+      const isMaxDepth = (typeof options.maxDepth==='number' && depth >= options.maxDepth);
 
     const symbols = {};
 
@@ -207,7 +189,7 @@ function printo(obj, options) {
  */
 
 /**
- * @typedef formatterResult
+ * @typedef {object} formatterResult
  * @property {string} key Value stored on the key
  * @property {string} val Value stored on the value
  */
