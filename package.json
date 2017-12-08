@@ -14,20 +14,24 @@
     "url": "https://github.com/krasimir/webpack-library-starter.git"
   },
   "keywords": [
-    "webpack",
-    "es6",
-    "starter",
-    "library",
-    "universal",
-    "umd",
-    "commonjs"
+    "json",
+    "stringify",
+    "cyclic",
+    "objects",
+    "recursive",
+    "serialize",
+    "debug"
   ],
-  "author": "Victor",
-  "license": "",
-  "bugs": {
-    "url": "https://github.com/krasimir/webpack-library-starter/issues"
+  "author": {
+    "name": "Victor Nunes",
+    "email": "vitimus@gmail.com",
+    "web": "http://vitim.us"
   },
-  "homepage": "https://github.com/krasimir/webpack-library-starter",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/victornpb/printo.js/issues"
+  },
+  "homepage": "https://github.com/victornpb/printo.js",
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
@@ -40,6 +44,8 @@
     "eslint-loader": "^1.9.0",
     "mocha": "^4.0.1",
     "webpack": "^3.8.1",
-    "yargs": "^10.0.3"
-  }
+    "yargs": "^10.0.3",
+    "jsdoc": "^3.5.5"
+  },
+  "dependencies": {}
 }
