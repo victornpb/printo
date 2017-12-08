@@ -6,7 +6,7 @@
  * @param {Boolean} options.skipPrototype Set to true to not enumerate properties from prototype
  * @param {String} options.rootKey Name use to represent the top level variable
  * @param {Function} options.formatter Function used to format each key, value in the final JSON
- * @param {Function} options.pathFormatter Function used to format the pointers path
+ * @param {Function} options.pointerFormatter Function used to format the pointers path
  * @param {Function} options.functionFormatter Function used to turn functions into strings
  */
 function printo(obj, options) {
@@ -25,7 +25,7 @@ function printo(obj, options) {
                 val: maxDepth ? '/* MAX DEPTH */' : value,
             };
         },
-        pathFormatter: function pathFormatter(path) {
+        pointerFormatter: function pointerFormatter(obj, path) {
             return `/* ${path.join('.')} */`;
         },
         functionFormatter: function functionFormatter(fn) {
@@ -141,7 +141,7 @@ function printo(obj, options) {
             let printVal;
 
             if (pointer) {
-                printVal = options.pathFormatter(pointer);
+                printVal = options.pointerFormatter(child, pointer);
             } else if (type === 'function') {
                 printVal = options.functionFormatter(child);
             } else if (type === 'object' || type === 'array') {
