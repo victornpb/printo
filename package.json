@@ -1,7 +1,7 @@
 {
   "name": "printo",
-  "version": "1.0.2",
-  "description": "Produce universal library with webpack and es6",
+  "version": "3.0.0",
+  "description": "Function to visualize objects of any kind including cyclic structures in a strigifable object",
   "main": "lib/printo.js",
   "scripts": {
     "build": "webpack --env dev && webpack --env build && npm run test",
@@ -22,8 +22,8 @@
     "umd",
     "commonjs"
   ],
-  "author": "Krasimir Tsonev",
-  "license": "MIT",
+  "author": "Victor",
+  "license": "",
   "bugs": {
     "url": "https://github.com/krasimir/webpack-library-starter/issues"
   },
