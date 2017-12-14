@@ -1,8 +1,8 @@
 {
   "name": "printo",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Function to visualize objects of any kind including cyclic structures in a strigifable object",
-  "main": "lib/printo.js",
+  "main": "src/index.js",
   "scripts": {
     "build": "webpack --env dev && webpack --env build && npm run test",
     "dev": "webpack --progress --colors --watch --env dev",

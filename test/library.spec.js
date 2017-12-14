@@ -2,7 +2,7 @@
 
 // import chai from 'chai';
 
-import printo from '../lib/library.js';
+import printo from '../src/printo.js';
 import obj from './obj.js';
 
 // chai.expect();
