@@ -7,7 +7,7 @@ DEMO JSFiddle: https://jsfiddle.net/Victornpb/nq13wke4/
 Usage
 ------
 
-    printo(/* anything */);
+    printo(any, [options]);
 
 Example
 -------
