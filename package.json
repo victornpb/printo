@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/krasimir/webpack-library-starter.git"
+    "url": "https://github.com/victornpb/printO.git"
   },
   "keywords": [
     "json",
@@ -29,9 +29,9 @@
   },
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/victornpb/printo.js/issues"
+    "url": "https://github.com/victornpb/printO/issues"
   },
-  "homepage": "https://github.com/victornpb/printo.js",
+  "homepage": "https://github.com/victornpb/printO",
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
