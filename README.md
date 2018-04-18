@@ -6,14 +6,14 @@ DEMO JSFiddle: https://jsfiddle.net/Victornpb/nq13wke4/
 
 Usage
 ------
-
-    printo(any, [options]);
-
+```js
+    printo(any, [options]);
+```
 Example
 -------
 
 ### Javascript
-```
+```js
 function Point(x, y) {
     this.x = x;
     this.y = y;
@@ -73,7 +73,7 @@ out.innerHTML = printo(obj);
 
 
 ### Serialized Output
-```
+```json
 {
     "root (object Object)": {
         "x (number)": 1,
