@@ -133,7 +133,7 @@ out.innerHTML = printo(obj);
 A little background about this function
 ----------
 
-I wrote this function back in the dark IE6 days, when Develpment tools (firebug, dragonfly, devtools) wasn't a thing, so the only thing you did back then was scatter alert()'s all over your code that was behaving. Trying to make something very object-oriented was a pain, so I wrote this function that I used to debug and inspect variables at runtime. I could use the `javascript:` protocol to launch popup with `window.open()` with the result of the `printo(someVeryComplicatedObject)` which outputed a formatted string at the time.
+I wrote this function back in the dark IE6 days, when Development tools (firebug, dragonfly, devtools) wasn't a thing, so the only thing you did back then was scatter alert()'s all over your code that was behaving. Trying to make something very object-oriented was a pain, so I wrote this function that I used to debug and inspect variables at runtime. I could use the `javascript:` protocol to launch a popup with `window.open()` with the result of the `printo(someVeryComplicatedObject)` which outputed a formatted string at the time.
  
 Today much of the use cases has been replaced by browser tools like the awesome Chrome DevTools, but it still usefull in some situations and eviroments where dubug tools are not available.
 
