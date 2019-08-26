@@ -1,5 +1,5 @@
 # Print Object
-Function to visualize objects of any kind including cyclic structures in a strigifable object
+Function to visualize objects of any kind including cyclic structures in a stringifiable object
 
 
 DEMO JSFiddle: https://jsfiddle.net/Victornpb/nq13wke4/
