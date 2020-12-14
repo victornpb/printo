@@ -1,16 +1,30 @@
 # Print Object
-Function to visualize objects of any kind including cyclic structures in a stringifiable object
-
+Visualize objects of any kind including cyclic structures in a stringifiable object
 
 DEMO JSFiddle: https://jsfiddle.net/Victornpb/nq13wke4/
 
-Usage
-------
+
+## Installation
+
+[NPM](https://www.npmjs.com/package/printo)
+
+	npm install micro-fps
+
+[Yarn](https://yarnpkg.com/package/printo)
+
+	yarn add micro-fps
+  
+[Unpkg](https://unpkg.com/browse/printo)
+
+    https://unpkg.com/browse/printo@3.0.1/lib/printo.min.js
+
+## Usage
+
 ```js
     printo(any, [options]);
 ```
-Example
--------
+
+## Example
 
 ### Javascript
 ```js
