@@ -20,6 +20,8 @@ DEMO JSFiddle: https://jsfiddle.net/Victornpb/nq13wke4/
 
 ## Usage
 
+See [documentation](./DOCUMENTATION.md)
+
 ```js
     printo(any, [options]);
 ```
@@ -142,7 +144,9 @@ out.innerHTML = printo(obj);
     }
 }
 ```
+## Documentation
 
+See [documentation](./DOCUMENTATION.md)
 
 A little background about this function
 ----------
