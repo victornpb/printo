@@ -8,11 +8,11 @@ DEMO JSFiddle: https://jsfiddle.net/Victornpb/nq13wke4/
 
 [NPM](https://www.npmjs.com/package/printo)
 
-	npm install micro-fps
+	npm install printo
 
 [Yarn](https://yarnpkg.com/package/printo)
 
-	yarn add micro-fps
+	yarn add printo
   
 [Unpkg](https://unpkg.com/browse/printo)
 
